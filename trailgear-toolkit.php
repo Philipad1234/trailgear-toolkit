@@ -6,3 +6,11 @@
  * Author:            Philip Adams
  * Text Domain:       trailgear-toolkit
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-checkout-fields.php';
+
+new TG_Checkout_Fields();
