@@ -41,11 +41,12 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
    admin notice and stay dormant if WooCommerce isn't detected.
 
 ## Project structure
+```
 trailgear-toolkit/
 ├── trailgear-toolkit.php # Main plugin file, header + bootstrap
 ├── includes/ # Feature classes (checkout fields, REST API, etc.)
 └── admin/ # Admin-only functionality (settings page)
-
+```
 
 ## Development notes
 To be completed as project progresses
