@@ -1,0 +1,60 @@
+# TrailGear Toolkit
+
+A custom WooCommerce plugin built for a fictional outdoor-gear store, demonstrating
+PHP/WordPress plugin development beyond drag-and-drop store configuration —
+custom product logic, checkout customization, a REST API endpoint, admin tooling,
+and automation, all built from scratch using WordPress/WooCommerce hooks and filters.
+
+## Why this exists
+
+This is a portfolio project. Rather than just configuring an off-the-shelf
+WooCommerce store, the goal here is to show hands-on PHP work: writing a
+proper plugin (not theme functions.php snippets), following WordPress plugin
+architecture conventions, and using WooCommerce's hook system the way a real
+client project would require.
+
+Demo store: outdoor/hiking gear retailer ("TrailGear").
+
+## Features
+
+- [x] Plugin scaffold with standard WordPress plugin header
+- [ ] Custom checkout field (preferred delivery date, saved to order meta)
+- [ ] REST API endpoint (low-stock product report)
+- [ ] Admin settings page (WP Settings API)
+- [ ] Custom "Rentable Gear" product type
+- [ ] WP-Cron automation (daily low-stock email digest)
+- [ ] Cart pricing rule (bulk-discount fee)
+- [ ] Order email customization
+
+## Requirements
+
+- WordPress 6.0+
+- WooCommerce 8.0+
+- PHP 8.0+
+
+## Installation
+
+1. Download or clone this repository.
+2. Copy (or symlink) the `trailgear-toolkit` folder into `wp-content/plugins/`.
+3. In wp-admin, go to **Plugins** and activate **TrailGear Toolkit**.
+4. Requires WooCommerce to be installed and active — the plugin will show an
+   admin notice and stay dormant if WooCommerce isn't detected.
+
+## Project structure
+trailgear-toolkit/
+├── trailgear-toolkit.php # Main plugin file, header + bootstrap
+├── includes/ # Feature classes (checkout fields, REST API, etc.)
+└── admin/ # Admin-only functionality (settings page)
+
+
+## Development notes
+To be completed as project progresses
+
+## Author
+
+Philip Adams
+https://philip-adams-portfolio.vercel.app/
+
+## License
+
+GPL-2.0+ (standard for WordPress plugins)
