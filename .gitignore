@@ -1,0 +1,40 @@
+# === OS/IDE Metadata ===
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# === Build Tools & Package Managers ===
+node_modules/
+bower_components/
+vendor/
+.npm/
+.yarn/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === Build Artifacts ===
+dist/
+build/
+out/
+*.zip
+
+# === PHPUnit & Testing ===
+/phpunit.xml
+/phpunit.xml.dist
+.phpunit.result.cache
+/tests/assets/
+coverage/
+
+# === Development Configuration ===
+.env
+.env.local
+wp-cli.local.yml
+
+# === Local Log Files ===
+*.log
