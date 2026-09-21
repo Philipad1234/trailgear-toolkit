@@ -18,7 +18,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 ## Features
 
 - [x] Plugin scaffold with standard WordPress plugin header
-- [ ] Custom checkout field (preferred delivery date, saved to order meta)
+- [X] Custom checkout field (preferred delivery date, saved to order meta)
 - [ ] REST API endpoint (low-stock product report)
 - [ ] Admin settings page (WP Settings API)
 - [ ] Custom "Rentable Gear" product type
@@ -48,8 +48,10 @@ trailgear-toolkit/
 └── admin/ # Admin-only functionality (settings page)
 ```
 
-## Development notes
-To be completed as project progresses
+## Development notes 
+
+### Custom checkout field 
+Added a "Preferred Delivery Date" field using woocommerce_after_order_notes to render it on checkout, woocommerce_checkout_update_order_meta to sanitize and persist the value as order meta (prefixed with _ to keep it out of WordPress's generic Custom Fields UI), and woocommerce_admin_order_data_after_billing_address to surface it on the admin order screen. Input is sanitized on save (sanitize_text_field) and escaped on output (esc_html)
 
 ## Author
 
