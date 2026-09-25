@@ -51,7 +51,8 @@ class TG_Admin_Settings
         $current_value = get_option($args['option_name']);
 
         echo sprintf(
-            '<input type="number" name="%s" value="%s">',
+            '<input type="%s" name="%s" value="%s">',
+            esc_attr($args['type'] ?? 'number'),
             esc_attr($args['option_name']),
             esc_attr($current_value)
         );
@@ -62,6 +63,7 @@ class TG_Admin_Settings
         //register_setting( string $option_group, string $option_name, array $args = array() )
         register_setting('trailgear_settings_group', 'tg_low_stock_threshold');
         register_setting('trailgear_settings_group', 'tg_rental_deposit_percent');
+        register_setting('trailgear_settings_group', 'tg_api_key');
 
         //add_settings_section( string $id, string $title, callable $callback, string $page, array $args = array() )
         add_settings_section('add-settings-section', 'Add Settings Section', '', 'trailgear-settings', array($this, 'render_add_settings_section'));
@@ -69,5 +71,6 @@ class TG_Admin_Settings
         //add_settings_field( string $id, string $title, callable $callback, string $page, string $section = 'default', array $args = array() )
         add_settings_field('tg_low_stock_threshold', 'TG Low Stock Threshold', array($this, 'render_add_settings_field'), 'trailgear-settings', 'add-settings-section', array('option_name' => 'tg_low_stock_threshold'));
         add_settings_field('tg_rental_deposit_percent', 'TG Rental Deposit Percent', array($this, 'render_add_settings_field'), 'trailgear-settings', 'add-settings-section', array('option_name' => 'tg_rental_deposit_percent'));
+        add_settings_field('tg_api_key', 'API Key', array($this, 'render_add_settings_field'), 'trailgear-settings', 'add-settings-section', array('option_name' => 'tg_api_key', 'type' => 'text'));
     }
 }
