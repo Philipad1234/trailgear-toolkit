@@ -6,7 +6,6 @@ if (! defined('ABSPATH')) {
 
 class TG_Checkout_Fields
 {
-    // 2. The Constructor (Runs automatically when creating an object)
     public function __construct()
     {
         add_action('woocommerce_after_order_notes', array($this, 'render_delivery_date_field'));
