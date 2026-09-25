@@ -20,7 +20,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 - [x] Plugin scaffold with standard WordPress plugin header
 - [X] Custom checkout field (preferred delivery date, saved to order meta)
 - [ ] REST API endpoint (low-stock product report)
-- [ ] Admin settings page (WP Settings API)
+- [X] Admin settings page (WP Settings API)
 - [ ] Custom "Rentable Gear" product type
 - [ ] WP-Cron automation (daily low-stock email digest)
 - [ ] Cart pricing rule (bulk-discount fee)
@@ -52,6 +52,9 @@ trailgear-toolkit/
 
 ### Custom checkout field 
 Added a "Preferred Delivery Date" field using woocommerce_after_order_notes to render it on checkout, woocommerce_checkout_update_order_meta to sanitize and persist the value as order meta (prefixed with _ to keep it out of WordPress's generic Custom Fields UI), and woocommerce_admin_order_data_after_billing_address to surface it on the admin order screen. Input is sanitized on save (sanitize_text_field) and escaped on output (esc_html)
+
+### Admin settings page
+Built with the WordPress Settings API (register_setting, add_settings_section, add_settings_field) rather than a custom form handler, so saving/validation goes through WordPress's own options.php pipeline. Exposes two configurable values, a low-stock threshold and a rental deposit percentage, that later features (REST API, cron digest) read via get_option() instead of hardcoding numbers.
 
 ## Author
 
