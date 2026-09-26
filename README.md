@@ -58,7 +58,7 @@ Added a "Preferred Delivery Date" field using woocommerce_after_order_notes to r
 ### Admin settings page
 Built with the WordPress Settings API (register_setting, add_settings_section, add_settings_field) rather than a custom form handler, so saving/validation goes through WordPress's own options.php pipeline. Exposes two configurable values, a low-stock threshold and a rental deposit percentage, that later features (REST API, cron digest) read via get_option() instead of hardcoding numbers.
 
-## REST API endpoint 
+### REST API endpoint 
 Registered via register_rest_route() on rest_api_init. Returns products at or below the configurable low-stock threshold (read from the settings page via get_option()), querying live data with wc_get_products() and extracting only the needed fields rather than exposing raw WC_Product objects. Protected with a permission_callback that validates a custom X-TrailGear-API-Key header against a saved API key, failing closed (denying access) if no key has been configured.
 
 ## Continuous Integration
