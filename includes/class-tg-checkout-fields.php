@@ -24,7 +24,7 @@ class TG_Checkout_Fields
     public function save_delivery_date_field($order_id)
     {
         if (isset($_POST['tg_delivery_date'])) {
-            $delivery_date = sanitize_text_field($_POST['tg_delivery_date'])
+            $delivery_date = sanitize_text_field($_POST['tg_delivery_date']);
             update_post_meta($order_id, '_tg_delivery_date', $delivery_date);
         }
     }
