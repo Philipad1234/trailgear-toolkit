@@ -1,5 +1,7 @@
 # TrailGear Toolkit
 
+![CI](https://github.com/Philipad1234/trailgear-toolkit/actions/workflows/ci.yml/badge.svg)
+
 A custom WooCommerce plugin built for a fictional outdoor-gear store, demonstrating
 PHP/WordPress plugin development beyond drag-and-drop store configuration —
 custom product logic, checkout customization, a REST API endpoint, admin tooling,
@@ -58,6 +60,10 @@ Built with the WordPress Settings API (register_setting, add_settings_section, a
 
 ## REST API endpoint 
 Registered via register_rest_route() on rest_api_init. Returns products at or below the configurable low-stock threshold (read from the settings page via get_option()), querying live data with wc_get_products() and extracting only the needed fields rather than exposing raw WC_Product objects. Protected with a permission_callback that validates a custom X-TrailGear-API-Key header against a saved API key, failing closed (denying access) if no key has been configured.
+
+## Continuous Integration
+This repo runs a GitHub Actions workflow on every push, checking all PHP files
+for syntax errors using `php -l`. See `.github/workflows/ci.yml`.
 
 ## Author
 
