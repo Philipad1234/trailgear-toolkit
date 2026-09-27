@@ -25,7 +25,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 - [X] Admin settings page (WP Settings API)
 - [ ] Custom "Rentable Gear" product type
 - [ ] WP-Cron automation (daily low-stock email digest)
-- [ ] Cart pricing rule (bulk-discount fee)
+- [X] Cart pricing rule (bulk-discount fee)
 - [ ] Order email customization
 
 ## Requirements
@@ -60,6 +60,14 @@ Built with the WordPress Settings API (register_setting, add_settings_section, a
 
 ### REST API endpoint 
 Registered via register_rest_route() on rest_api_init. Returns products at or below the configurable low-stock threshold (read from the settings page via get_option()), querying live data with wc_get_products() and extracting only the needed fields rather than exposing raw WC_Product objects. Protected with a permission_callback that validates a custom X-TrailGear-API-Key header against a saved API key, failing closed (denying access) if no key has been configured.
+
+### Cart pricing rule
+Hooked into `woocommerce_cart_calculate_fees` to tally cart item quantities by
+product category, then apply a flat $5 "Bulk Discount" fee via
+`WC()->cart->add_fee()` when any single category reaches 3+ items. Category
+totals are tracked in an associative array (category ID => running quantity)
+built from each cart item's `get_category_ids()`, since a product can belong
+to multiple categories at once.
 
 ## Continuous Integration
 This repo runs a GitHub Actions workflow on every push, checking all PHP files
