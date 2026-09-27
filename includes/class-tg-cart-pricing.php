@@ -14,6 +14,7 @@ class TG_Cart_Pricing
     {
         $cart_items = WC()->cart->get_cart();
         $category_counts = array();
+        $category_totals = array();
         foreach ($cart_items as $cart_item) {
             $product = $cart_item['data'];
             $category_ids = $product->get_category_ids();
@@ -22,11 +23,16 @@ class TG_Cart_Pricing
                     $category_counts[$category_id] = 0;
                 }
                 $category_counts[$category_id] += $cart_item['quantity'];
+                if (! isset($category_totals[$category_id])) {
+                    $category_totals[$category_id] = 0;
+                }
+                $category_totals[$category_id] += $cart_item['line_total'];
             }
         }
         foreach ($category_counts as $category_id => $count) {
-            if($count >= 3){
-                WC()->cart->add_fee('Bulk Discount', -5.00);
+            if ($count >= 3) {
+                $discount_amount = $category_totals[$category_id] * -0.1;
+                WC()->cart->add_fee('Bulk Discount (10%)', $discount_amount);
                 break;
             }
         }
