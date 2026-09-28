@@ -12,7 +12,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 
 ## Features
 
-- [x] Plugin scaffold with standard WordPress plugin header
+- [X] Plugin scaffold with standard WordPress plugin header
 - [X] Custom checkout field (preferred delivery date, saved to order meta)
 - [X] REST API endpoint (low-stock product report)
 - [X] Admin settings page (WP Settings API)
@@ -37,9 +37,20 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 ## Project structure
 ```
 trailgear-toolkit/
-├── trailgear-toolkit.php # Main plugin file, header + bootstrap
+├── .github/ # CI workflow (GitHub Actions)
+│   └── workflows/
+│       └── ci.yml
+├── admin/ # Admin-only functionality (settings page)
+│   └── class-tg-admin-settings.php
 ├── includes/ # Feature classes (checkout fields, REST API, etc.)
-└── admin/ # Admin-only functionality (settings page)
+│   ├── class-tg-cart-pricing.php
+│   ├── class-tg-checkout-fields.php
+│   ├── class-tg-product-rentable.php
+│   ├── class-tg-rental-product.php
+│   └── class-tg-rest-api.php
+├── .gitignore
+├── README.md
+└── trailgear-toolkit.php # Main plugin file, header + bootstrap
 ```
 
 ## Development notes 
