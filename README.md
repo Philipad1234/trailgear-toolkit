@@ -2,18 +2,11 @@
 
 ![CI](https://github.com/Philipad1234/trailgear-toolkit/actions/workflows/ci.yml/badge.svg)
 
-A custom WooCommerce plugin built for a fictional outdoor-gear store, demonstrating
-PHP/WordPress plugin development beyond drag-and-drop store configuration —
-custom product logic, checkout customization, a REST API endpoint, admin tooling,
-and automation, all built from scratch using WordPress/WooCommerce hooks and filters.
+A custom WooCommerce plugin built for a fictional outdoor-gear store, demonstrating PHP/WordPress plugin development beyond drag-and-drop store configuration: custom product logic, checkout customization, a REST API endpoint, admin tooling, and automation, all built from scratch using WordPress/WooCommerce hooks and filters.
 
 ## Why this exists
 
-This is a portfolio project. Rather than just configuring an off-the-shelf
-WooCommerce store, the goal here is to show hands-on PHP work: writing a
-proper plugin (not theme functions.php snippets), following WordPress plugin
-architecture conventions, and using WooCommerce's hook system the way a real
-client project would require.
+This is a portfolio project. Rather than just configuring an off-the-shelf WooCommerce store, the goal here is to show hands-on PHP work: writing a proper plugin (not theme functions.php snippets), following WordPress plugin architecture conventions, and using WooCommerce's hook system the way a real client project would require.
 
 Demo store: outdoor/hiking gear retailer ("TrailGear").
 
@@ -39,8 +32,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 1. Download or clone this repository.
 2. Copy (or symlink) the `trailgear-toolkit` folder into `wp-content/plugins/`.
 3. In wp-admin, go to **Plugins** and activate **TrailGear Toolkit**.
-4. Requires WooCommerce to be installed and active — the plugin will show an
-   admin notice and stay dormant if WooCommerce isn't detected.
+4. Requires WooCommerce to be installed and active. The plugin will show an admin notice and stay dormant if WooCommerce isn't detected.
 
 ## Project structure
 ```
@@ -64,9 +56,15 @@ Registered via register_rest_route() on rest_api_init. Returns products at or be
 ### Cart pricing rule
 Hooked into `woocommerce_cart_calculate_fees` to tally both quantity and subtotal per product category in a single pass over the cart (using each cart item's `get_category_ids()` and `line_total`). When any category reaches 3+ items, applies a 10% discount fee via `WC()->cart->add_fee()`, calculated against that category's actual subtotal rather than a flat amount, so the discount scales with what's actually in the cart.
 
+### Custom "Rentable Gear" product type
+Registered a new product type by hooking `product_type_selector` (a filter, not an action. it receives the array of type labels and must return it) to add "Rentable Gear" to the dropdown, and `woocommerce_product_class` to tell WooCommerce which PHP class to build when a product's type is `rentable`.
+
+The class itself, `TG_Product_Rentable`, extends `WC_Product` and overrides only `get_type()`.
+
+The trickiest part was load order: `TG_Product_Rentable` contains `extends WC_Product`, which requires WooCommerce's classes to already be loaded. WordPress loads plugins alphabetically, so `trailgear-toolkit` loads before `woocommerce`, requiring the file at the top level would fatal with "Class WC_Product not found". Fixed by hooking the `require_once` to `woocommerce_loaded`, so the file is only read once WooCommerce itself is fully available.
+
 ## Continuous Integration
-This repo runs a GitHub Actions workflow on every push, checking all PHP files
-for syntax errors using `php -l`. See `.github/workflows/ci.yml`.
+This repo runs a GitHub Actions workflow on every push, checking all PHP files for syntax errors using `php -l`. See `.github/workflows/ci.yml`.
 
 ## Author
 
