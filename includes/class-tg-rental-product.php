@@ -51,7 +51,13 @@ class TG_Rental_Product
     public function add_rental_panels()
     {
         echo '<div id="rental_product_data" class="panel woocommerce_options_panel">';
-        echo '<p>Rental fields go here.</p>';
+        echo '<div class="options_group">';
+        woocommerce_wp_text_input([
+            'id' => '_rental_rate_per_day',
+            'label' => 'Daily Rental Rate ($)',
+            'data_type' => 'price'
+        ]);
+        echo '</div>';
         echo '</div>';
     }
 }
