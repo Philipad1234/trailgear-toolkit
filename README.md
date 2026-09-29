@@ -67,12 +67,14 @@ Registered via register_rest_route() on rest_api_init. Returns products at or be
 ### Cart pricing rule
 Hooked into `woocommerce_cart_calculate_fees` to tally both quantity and subtotal per product category in a single pass over the cart (using each cart item's `get_category_ids()` and `line_total`). When any category reaches 3+ items, applies a 10% discount fee via `WC()->cart->add_fee()`, calculated against that category's actual subtotal rather than a flat amount, so the discount scales with what's actually in the cart.
 
-### Custom "Rentable Gear" product type
-Registered a new product type by hooking `product_type_selector` (a filter, not an action. it receives the array of type labels and must return it) to add "Rentable Gear" to the dropdown, and `woocommerce_product_class` to tell WooCommerce which PHP class to build when a product's type is `rentable`.
+### Custom "Rentable Gear" product type (in progress)
+Registered a new product type by hooking `product_type_selector` (a filter, not an action, it receives the array of type labels and must return it) to add "Rentable Gear" to the dropdown, and `woocommerce_product_class` to tell WooCommerce which PHP class to build when a product's type is `rentable`. `TG_Product_Rentable` extends `WC_Product` and overrides only `get_type()`, inheriting every normal product capability for free.
 
-The class itself, `TG_Product_Rentable`, extends `WC_Product` and overrides only `get_type()`.
+Load order mattered: `TG_Product_Rentable` contains `extends WC_Product`, which requires WooCommerce's classes to already be loaded. WordPress loads plugins alphabetically, so `trailgear-toolkit` loads before `woocommerce`, requiring the file at the top level would fatal with "Class WC_Product not found". Fixed by hooking the `require_once` to `woocommerce_loaded`.
 
-The trickiest part was load order: `TG_Product_Rentable` contains `extends WC_Product`, which requires WooCommerce's classes to already be loaded. WordPress loads plugins alphabetically, so `trailgear-toolkit` loads before `woocommerce`, requiring the file at the top level would fatal with "Class WC_Product not found". Fixed by hooking the `require_once` to `woocommerce_loaded`, so the file is only read once WooCommerce itself is fully available.
+Added a custom "Rental" tab to the product data box via `woocommerce_product_data_tabs`, and rendered a "Daily Rental Rate ($)" field inside it via `woocommerce_product_data_panels`, using `woocommerce_wp_text_input()` for consistent styling with WooCommerce's built-in fields. Saving uses the type-specific `woocommerce_process_product_meta_rentable` hook, so the save logic only runs for this product type, with `wc_format_decimal()` for sanitizing a price value on the way in.
+
+Still to do: display the rate and an add-to-cart flow on the storefront, and apply the rental deposit percentage as a cart fee.
 
 ## Continuous Integration
 This repo runs a GitHub Actions workflow on every push, checking all PHP files for syntax errors using `php -l`. See `.github/workflows/ci.yml`.
