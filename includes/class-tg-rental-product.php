@@ -12,6 +12,8 @@ class TG_Rental_Product
         add_filter('product_type_selector', array($this, 'select_product_type'));
         add_filter('woocommerce_product_class', array($this, 'product_class_filter'), 10, 4);
         add_action('woocommerce_loaded', array($this, 'load_woocommerce'));
+        add_filter('woocommerce_product_data_tabs', array($this, 'add_rental_tabs'));
+        add_action('woocommerce_product_data_panels', array($this, 'add_rental_panels'));
     }
 
     public function select_product_type(array $types)
@@ -34,5 +36,22 @@ class TG_Rental_Product
     public function load_woocommerce()
     {
         require_once plugin_dir_path(__FILE__) . 'class-tg-product-rentable.php';
+    }
+
+    public function add_rental_tabs($tabs)
+    {
+        $tabs['rental'] = array(
+            'label' => 'Rental',
+            'target' => 'rental_product_data',
+            'class' => array('hide_if_grouped')
+        );
+        return $tabs;
+    }
+
+    public function add_rental_panels()
+    {
+        echo '<div id="rental_product_data" class="panel woocommerce_options_panel">';
+        echo '<p>Rental fields go here.</p>';
+        echo '</div>';
     }
 }
