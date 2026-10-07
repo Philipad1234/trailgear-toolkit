@@ -10,4 +10,13 @@ class TG_Product_Rentable extends WC_Product
     {
         return 'rentable';
     }
+
+    public function get_price_html($deprecated = '')
+    {
+        $saved_rate = get_post_meta($this->get_id(), '_rental_rate_per_day', true);
+        if (! $saved_rate) {
+            return '';
+        }
+        return wc_price($saved_rate) . ' /day';
+    }
 }
