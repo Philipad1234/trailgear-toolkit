@@ -15,6 +15,8 @@ class TG_Rental_Product
         add_filter('woocommerce_product_data_tabs', array($this, 'add_rental_tabs'));
         add_action('woocommerce_product_data_panels', array($this, 'add_rental_panels'));
         add_action('woocommerce_process_product_meta_rentable', array($this, 'save_rental_meta'));
+        add_action('woocommerce_rentable_add_to_cart', array($this, 'render_rentable_add_to_cart'));
+        add_filter('woocommerce_is_purchasable', array($this, 'make_rentable_purchasable'), 10, 2);
     }
 
     public function select_product_type(array $types)
@@ -70,5 +72,21 @@ class TG_Rental_Product
             $formatted_rate = wc_format_decimal($_POST['_rental_rate_per_day']);
             update_post_meta($post_id, '_rental_rate_per_day', $formatted_rate);
         }
+    }
+
+    public function make_rentable_purchasable($purchasable, $product)
+    {
+        if ($product->get_type() === 'rentable') {
+            $saved_rate = get_post_meta($product->get_id(), '_rental_rate_per_day', true);
+            if ($saved_rate) {
+                return true;
+            }
+        }
+        return $purchasable;
+    }
+
+    public function render_rentable_add_to_cart()
+    {
+        wc_get_template('single-product/add-to-cart/simple.php');
     }
 }
