@@ -28,3 +28,4 @@ new TG_Admin_Settings();
 new TG_REST_API();
 new TG_Cart_Pricing();
 new TG_Rental_Product();
+new TG_Stock_Cron();
