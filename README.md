@@ -17,7 +17,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 - [X] REST API endpoint (low-stock product report)
 - [X] Admin settings page (WP Settings API)
 - [X] Custom "Rentable Gear" product type
-- [ ] WP-Cron automation (daily low-stock email digest)
+- [X] WP-Cron automation (daily low-stock email digest)
 - [X] Cart pricing rule (bulk-discount fee)
 - [ ] Order email customization
 
@@ -86,6 +86,11 @@ Added a custom "Rental" tab to the product data box via `woocommerce_product_dat
 On the storefront, `get_price_html()` formats the saved rate with `wc_price()` for display, while `get_price()` separately returns the raw number used in cart and checkout math, since WooCommerce reads these two methods for different purposes and overriding only one left the cart showing $0.00. `woocommerce_is_purchasable` is filtered so a rentable product is only purchasable once a rate has been saved, and the `woocommerce_rentable_add_to_cart` action, named automatically from the product type, reuses WooCommerce's own Simple product add-to-cart template rather than hand-building form markup.
 
 In the cart, `woocommerce_cart_calculate_fees` tallies the subtotal of every rentable line item and applies a configurable deposit (`tg_rental_deposit_percent`, read via `get_option()`) as a separate, positive "Rental Deposit" fee alongside the regular rental charge.
+
+### WP-Cron automation (daily low-stock email digest)
+Schedules a custom cron event, `tg_daily_low_stock_check`, on plugin activation via `wp_schedule_event()`, guarded with `wp_next_scheduled()` to avoid stacking duplicate events, and clears it on deactivation with `wp_clear_scheduled_hook()`, both registered through `register_activation_hook()`/`register_deactivation_hook()` rather than a normal `add_action()`, since they fire at a one-time plugin lifecycle moment rather than on every page load.
+
+Rather than duplicating the low-stock query, the digest reuses `TG_REST_API::get_low_stock_response()` directly, instantiating that class and calling the method, one source of truth for what counts as low stock, shared between the REST endpoint and the email digest. Builds the email body with a loop over the returned array and sends it with `wp_mail()` to the site's configured admin address.
 
 ## Continuous Integration
 This repo runs a GitHub Actions workflow on every push, checking all PHP files for syntax errors using `php -l`. See `.github/workflows/ci.yml`.
