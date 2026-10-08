@@ -11,11 +11,17 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+
+
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-checkout-fields.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/class-tg-admin-settings.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-rest-api.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-rental-product.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-cart-pricing.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-stock-cron.php';
+
+register_activation_hook( __FILE__, array( 'TG_Stock_Cron', 'activate' ) );
+register_deactivation_hook( __FILE__, array( 'TG_Stock_Cron', 'deactivate' ) );
 
 new TG_Checkout_Fields();
 new TG_Admin_Settings();
