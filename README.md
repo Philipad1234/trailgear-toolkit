@@ -19,7 +19,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 - [X] Custom "Rentable Gear" product type
 - [X] WP-Cron automation (daily low-stock email digest)
 - [X] Cart pricing rule (bulk-discount fee)
-- [ ] Order email customization
+- [X] Order email customization
 
 ## Requirements
 
@@ -91,6 +91,9 @@ In the cart, `woocommerce_cart_calculate_fees` tallies the subtotal of every ren
 Schedules a custom cron event, `tg_daily_low_stock_check`, on plugin activation via `wp_schedule_event()`, guarded with `wp_next_scheduled()` to avoid stacking duplicate events, and clears it on deactivation with `wp_clear_scheduled_hook()`, both registered through `register_activation_hook()`/`register_deactivation_hook()` rather than a normal `add_action()`, since they fire at a one-time plugin lifecycle moment rather than on every page load.
 
 Rather than duplicating the low-stock query, the digest reuses `TG_REST_API::get_low_stock_response()` directly, instantiating that class and calling the method, one source of truth for what counts as low stock, shared between the REST endpoint and the email digest. Builds the email body with a loop over the returned array and sends it with `wp_mail()` to the site's configured admin address.
+
+### Order email customization
+Hooks `woocommerce_email_order_details` to add the saved Preferred Delivery Date to order confirmation emails, reading the same `_tg_delivery_date` meta key saved by the checkout field feature. Skips admin notification emails entirely by checking `$sent_to_admin`, showing the date only to the customer. Branches on `$plain_text` to output either a plain string with manual line breaks or escaped HTML, since WooCommerce sends some emails as plain text with no markup rendering at all, a naive single `echo` would have shown raw HTML tags as visible text in a plain-text email.
 
 ## Continuous Integration
 This repo runs a GitHub Actions workflow on every push, checking all PHP files for syntax errors using `php -l`. See `.github/workflows/ci.yml`.
