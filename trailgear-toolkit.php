@@ -19,6 +19,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-rest-api.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-rental-product.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-cart-pricing.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-stock-cron.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-tg-email-customizer.php';
 
 register_activation_hook( __FILE__, array( 'TG_Stock_Cron', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'TG_Stock_Cron', 'deactivate' ) );
@@ -29,3 +30,4 @@ new TG_REST_API();
 new TG_Cart_Pricing();
 new TG_Rental_Product();
 new TG_Stock_Cron();
+new TG_Email_Customizer();
