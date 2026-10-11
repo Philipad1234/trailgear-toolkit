@@ -36,22 +36,22 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 
 ## Project structure
 ```
-trailgear-toolkit/
 ├── .github/ # CI workflow (GitHub Actions)
-│   └── workflows/
-│       └── ci.yml
+│ └── workflows/
+│ └── ci.yml
 ├── admin/ # Admin-only functionality (settings page)
-│   └── class-tg-admin-settings.php
+│ └── class-tg-admin-settings.php
 ├── includes/ # Feature classes (checkout fields, REST API, etc.)
-│   ├── class-tg-cart-pricing.php
-│   ├── class-tg-checkout-fields.php
-│   ├── class-tg-product-rentable.php
-│   ├── class-tg-rental-product.php
-│   └── class-tg-rest-api.php
+│ ├── class-tg-cart-pricing.php
+│ ├── class-tg-checkout-fields.php
+│ ├── class-tg-product-rentable.php
+│ ├── class-tg-rental-product.php
+│ └── class-tg-rest-api.php
 ├── .gitignore
 ├── README.md
 └── trailgear-toolkit.php # Main plugin file, header + bootstrap
 ```
+
 
 ## Development notes 
 
@@ -67,15 +67,6 @@ Registered via register_rest_route() on rest_api_init. Returns products at or be
 ### Cart pricing rule
 Hooked into `woocommerce_cart_calculate_fees` to tally both quantity and subtotal per product category in a single pass over the cart (using each cart item's `get_category_ids()` and `line_total`). When any category reaches 3+ items, applies a 10% discount fee via `WC()->cart->add_fee()`, calculated against that category's actual subtotal rather than a flat amount, so the discount scales with what's actually in the cart.
 
-### Custom "Rentable Gear" product type (in progress)
-Registered a new product type by hooking `product_type_selector` (a filter, not an action, it receives the array of type labels and must return it) to add "Rentable Gear" to the dropdown, and `woocommerce_product_class` to tell WooCommerce which PHP class to build when a product's type is `rentable`. `TG_Product_Rentable` extends `WC_Product` and overrides only `get_type()`, inheriting every normal product capability for free.
-
-Load order mattered: `TG_Product_Rentable` contains `extends WC_Product`, which requires WooCommerce's classes to already be loaded. WordPress loads plugins alphabetically, so `trailgear-toolkit` loads before `woocommerce`, requiring the file at the top level would fatal with "Class WC_Product not found". Fixed by hooking the `require_once` to `woocommerce_loaded`.
-
-Added a custom "Rental" tab to the product data box via `woocommerce_product_data_tabs`, and rendered a "Daily Rental Rate ($)" field inside it via `woocommerce_product_data_panels`, using `woocommerce_wp_text_input()` for consistent styling with WooCommerce's built-in fields. Saving uses the type-specific `woocommerce_process_product_meta_rentable` hook, so the save logic only runs for this product type, with `wc_format_decimal()` for sanitizing a price value on the way in.
-
-Still to do: display the rate and an add-to-cart flow on the storefront, and apply the rental deposit percentage as a cart fee.
-
 ### Custom "Rentable Gear" product type
 Registered a new product type by hooking `product_type_selector` (a filter, not an action, it receives the array of type labels and must return it) to add "Rentable Gear" to the dropdown, and `woocommerce_product_class` to tell WooCommerce which PHP class to build when a product's type is `rentable`. `TG_Product_Rentable` extends `WC_Product` and overrides `get_type()`, `get_price_html()`, and `get_price()`, inheriting every other product capability for free.
 
@@ -87,6 +78,8 @@ On the storefront, `get_price_html()` formats the saved rate with `wc_price()` f
 
 In the cart, `woocommerce_cart_calculate_fees` tallies the subtotal of every rentable line item and applies a configurable deposit (`tg_rental_deposit_percent`, read via `get_option()`) as a separate, positive "Rental Deposit" fee alongside the regular rental charge.
 
+Known limitation: WooCommerce's shop-grid "Add to cart" button isn't implemented for this type, it falls back to "Read more", linking through to the single product page, which renders the real add-to-cart form correctly.
+
 ### WP-Cron automation (daily low-stock email digest)
 Schedules a custom cron event, `tg_daily_low_stock_check`, on plugin activation via `wp_schedule_event()`, guarded with `wp_next_scheduled()` to avoid stacking duplicate events, and clears it on deactivation with `wp_clear_scheduled_hook()`, both registered through `register_activation_hook()`/`register_deactivation_hook()` rather than a normal `add_action()`, since they fire at a one-time plugin lifecycle moment rather than on every page load.
 
@@ -97,6 +90,14 @@ Hooks `woocommerce_email_order_details` to add the saved Preferred Delivery Date
 
 ## Continuous Integration
 This repo runs a GitHub Actions workflow on every push, checking all PHP files for syntax errors using `php -l`. See `.github/workflows/ci.yml`.
+
+## Deployment
+
+Live demo: https://trailgear.duckdns.org
+
+Deployed to a Google Cloud Platform Always Free tier `e2-micro` VM instance (Debian), with a hand-configured LAMP stack (Apache, MariaDB, PHP 8.4), a free DuckDNS subdomain, and a Let's Encrypt SSL certificate via Certbot. Two real deployment issues found and fixed during testing:
+- WordPress's REST API routes returned 404s until Apache's `mod_rewrite` was explicitly enabled and `AllowOverride All` was set for the web root, Apache's default configuration ignores `.htaccess` (and therefore WordPress's pretty permalinks) entirely without both.
+- WooCommerce's default Checkout page used the newer block-based checkout, which doesn't fire the classic `woocommerce_after_order_notes` and related hooks this plugin depends on. Switched the Checkout page to the `[woocommerce_checkout]` shortcode to restore classic checkout behavior.
 
 ## Author
 
