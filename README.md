@@ -56,7 +56,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 ## Development notes 
 
 ### Custom checkout field 
-Added a "Preferred Delivery Date" field using woocommerce_after_order_notes to render it on checkout, woocommerce_checkout_update_order_meta to sanitize and persist the value as order meta (prefixed with _ to keep it out of WordPress's generic Custom Fields UI), and woocommerce_admin_order_data_after_billing_address to surface it on the admin order screen. Input is sanitized on save (sanitize_text_field) and escaped on output (esc_html)
+Added a "Preferred Delivery Date" field using woocommerce_after_checkout_billing_form to render it on checkout directly under the billing details, where customers are more likely to see it, woocommerce_checkout_update_order_meta to sanitize and persist the value as order meta (prefixed with _ to keep it out of WordPress's generic Custom Fields UI), and woocommerce_admin_order_data_after_billing_address to surface it on the admin order screen. Input is sanitized on save (sanitize_text_field) and escaped on output (esc_html)
 
 ### Admin settings page
 Built with the WordPress Settings API (register_setting, add_settings_section, add_settings_field) rather than a custom form handler, so saving/validation goes through WordPress's own options.php pipeline. Exposes two configurable values, a low-stock threshold and a rental deposit percentage, that later features (REST API, cron digest) read via get_option() instead of hardcoding numbers.
@@ -97,7 +97,7 @@ Live demo: https://trailgear.duckdns.org
 
 Deployed to a Google Cloud Platform Always Free tier `e2-micro` VM instance (Debian), with a hand-configured LAMP stack (Apache, MariaDB, PHP 8.4), a free DuckDNS subdomain, and a Let's Encrypt SSL certificate via Certbot. Two real deployment issues found and fixed during testing:
 - WordPress's REST API routes returned 404s until Apache's `mod_rewrite` was explicitly enabled and `AllowOverride All` was set for the web root, Apache's default configuration ignores `.htaccess` (and therefore WordPress's pretty permalinks) entirely without both.
-- WooCommerce's default Checkout page used the newer block-based checkout, which doesn't fire the classic `woocommerce_after_order_notes` and related hooks this plugin depends on. Switched the Checkout page to the `[woocommerce_checkout]` shortcode to restore classic checkout behavior.
+- WooCommerce's default Checkout page used the newer block-based checkout, which doesn't fire the classic `woocommerce_after_checkout_billing_form` and related hooks this plugin depends on. Switched the Checkout page to the `[woocommerce_checkout]` shortcode to restore classic checkout behavior.
 
 ## Author
 
