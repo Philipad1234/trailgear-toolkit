@@ -12,14 +12,14 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 
 ## Features
 
-- [X] Plugin scaffold with standard WordPress plugin header
-- [X] Custom checkout field (preferred delivery date, saved to order meta)
-- [X] REST API endpoint (low-stock product report)
-- [X] Admin settings page (WP Settings API)
-- [X] Custom "Rentable Gear" product type
-- [X] WP-Cron automation (daily low-stock email digest)
-- [X] Cart pricing rule (bulk-discount fee)
-- [X] Order email customization
+- [x] Plugin scaffold with standard WordPress plugin header
+- [x] Custom checkout field (preferred delivery date, saved to order meta)
+- [x] REST API endpoint (low-stock product report)
+- [x] Admin settings page (WP Settings API)
+- [x] Custom "Rentable Gear" product type
+- [x] WP-Cron automation (daily low-stock email digest)
+- [x] Cart pricing rule (bulk-discount fee)
+- [x] Order email customization
 
 ## Requirements
 
@@ -35,6 +35,7 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 4. Requires WooCommerce to be installed and active. The plugin will show an admin notice and stay dormant if WooCommerce isn't detected.
 
 ## Project structure
+
 ```
 ├── .github/ # CI workflow (GitHub Actions)
 │ └── workflows/
@@ -52,22 +53,26 @@ Demo store: outdoor/hiking gear retailer ("TrailGear").
 └── trailgear-toolkit.php # Main plugin file, header + bootstrap
 ```
 
+## Development notes
 
-## Development notes 
+### Custom checkout field
 
-### Custom checkout field 
-Added a "Preferred Delivery Date" field using woocommerce_after_checkout_billing_form to render it on checkout directly under the billing details, where customers are more likely to see it, woocommerce_checkout_update_order_meta to sanitize and persist the value as order meta (prefixed with _ to keep it out of WordPress's generic Custom Fields UI), and woocommerce_admin_order_data_after_billing_address to surface it on the admin order screen. Input is sanitized on save (sanitize_text_field) and escaped on output (esc_html)
+Added a "Preferred Delivery Date" field using woocommerce*after_checkout_billing_form to render it on checkout directly under the billing details, where customers are more likely to see it, woocommerce_checkout_update_order_meta to sanitize and persist the value as order meta (prefixed with * to keep it out of WordPress's generic Custom Fields UI), and woocommerce_admin_order_data_after_billing_address to surface it on the admin order screen. Input is sanitized on save (sanitize_text_field) and escaped on output (esc_html)
 
 ### Admin settings page
+
 Built with the WordPress Settings API (register_setting, add_settings_section, add_settings_field) rather than a custom form handler, so saving/validation goes through WordPress's own options.php pipeline. Exposes two configurable values, a low-stock threshold and a rental deposit percentage, that later features (REST API, cron digest) read via get_option() instead of hardcoding numbers.
 
-### REST API endpoint 
+### REST API endpoint
+
 Registered via register_rest_route() on rest_api_init. Returns products at or below the configurable low-stock threshold (read from the settings page via get_option()), querying live data with wc_get_products() and extracting only the needed fields rather than exposing raw WC_Product objects. Protected with a permission_callback that validates a custom X-TrailGear-API-Key header against a saved API key, failing closed (denying access) if no key has been configured.
 
 ### Cart pricing rule
+
 Hooked into `woocommerce_cart_calculate_fees` to tally both quantity and subtotal per product category in a single pass over the cart (using each cart item's `get_category_ids()` and `line_total`). When any category reaches 3+ items, applies a 10% discount fee via `WC()->cart->add_fee()`, calculated against that category's actual subtotal rather than a flat amount, so the discount scales with what's actually in the cart.
 
 ### Custom "Rentable Gear" product type
+
 Registered a new product type by hooking `product_type_selector` (a filter, not an action, it receives the array of type labels and must return it) to add "Rentable Gear" to the dropdown, and `woocommerce_product_class` to tell WooCommerce which PHP class to build when a product's type is `rentable`. `TG_Product_Rentable` extends `WC_Product` and overrides `get_type()`, `get_price_html()`, and `get_price()`, inheriting every other product capability for free.
 
 Load order mattered: `TG_Product_Rentable` contains `extends WC_Product`, which requires WooCommerce's classes to already be loaded. WordPress loads plugins alphabetically, so `trailgear-toolkit` loads before `woocommerce`, requiring the file at the top level would fatal with "Class WC_Product not found." Fixed by hooking the `require_once` to `woocommerce_loaded`.
@@ -81,29 +86,35 @@ In the cart, `woocommerce_cart_calculate_fees` tallies the subtotal of every ren
 Known limitation: WooCommerce's shop-grid "Add to cart" button isn't implemented for this type, it falls back to "Read more", linking through to the single product page, which renders the real add-to-cart form correctly.
 
 ### WP-Cron automation (daily low-stock email digest)
+
 Schedules a custom cron event, `tg_daily_low_stock_check`, on plugin activation via `wp_schedule_event()`, guarded with `wp_next_scheduled()` to avoid stacking duplicate events, and clears it on deactivation with `wp_clear_scheduled_hook()`, both registered through `register_activation_hook()`/`register_deactivation_hook()` rather than a normal `add_action()`, since they fire at a one-time plugin lifecycle moment rather than on every page load.
 
 Rather than duplicating the low-stock query, the digest reuses `TG_REST_API::get_low_stock_response()` directly, instantiating that class and calling the method, one source of truth for what counts as low stock, shared between the REST endpoint and the email digest. Builds the email body with a loop over the returned array and sends it with `wp_mail()` to the site's configured admin address.
 
 ### Order email customization
+
 Hooks `woocommerce_email_order_details` to add the saved Preferred Delivery Date to order confirmation emails, reading the same `_tg_delivery_date` meta key saved by the checkout field feature. Skips admin notification emails entirely by checking `$sent_to_admin`, showing the date only to the customer. Branches on `$plain_text` to output either a plain string with manual line breaks or escaped HTML, since WooCommerce sends some emails as plain text with no markup rendering at all, a naive single `echo` would have shown raw HTML tags as visible text in a plain-text email.
 
 ## Continuous Integration
+
 This repo runs a GitHub Actions workflow on every push, checking all PHP files for syntax errors using `php -l`. See `.github/workflows/ci.yml`.
 
 ## Deployment
 
 Live demo: https://trailgear.duckdns.org
 
-Deployed to a Google Cloud Platform Always Free tier `e2-micro` VM instance (Debian), with a hand-configured LAMP stack (Apache, MariaDB, PHP 8.4), a free DuckDNS subdomain, and a Let's Encrypt SSL certificate via Certbot. Two real deployment issues found and fixed during testing:
+Deployed to a Google Cloud Platform Always Free tier `e2-micro` VM instance (Debian), with a hand-configured LAMP stack (Apache, MariaDB, PHP 8.4), a free DuckDNS subdomain, and a Let's Encrypt SSL certificate via Certbot. Three real deployment/production issues found and fixed during testing:
+
 - WordPress's REST API routes returned 404s until Apache's `mod_rewrite` was explicitly enabled and `AllowOverride All` was set for the web root, Apache's default configuration ignores `.htaccess` (and therefore WordPress's pretty permalinks) entirely without both.
 - WooCommerce's default Checkout page used the newer block-based checkout, which doesn't fire the classic `woocommerce_after_checkout_billing_form` and related hooks this plugin depends on. Switched the Checkout page to the `[woocommerce_checkout]` shortcode to restore classic checkout behavior.
+- Six days after launch, the live site started returning `ERR_TIMED_OUT`, and even SSH stopped connecting. The GCP serial console's kernel log showed the OOM killer repeatedly killing the Apache process: the `e2-micro` VM's 1GB of RAM had no swap configured, and Apache's default `MaxRequestWorkers` (150) let it spawn far more processes than that memory could hold. Fixed by resetting the VM, adding a 1GB swap file (persisted in `/etc/fstab`), and capping Apache's prefork MPM down to `MaxRequestWorkers 15` in `mpm_prefork.conf`.
 
 ## Author
 
 Philip Adams
 
 ## Portfolio link
+
 https://philip-adams-portfolio.vercel.app/
 
 ## License
